@@ -42,7 +42,7 @@ class CollectionGenerator(BaseExtractor):
         name = aggregator_conf['name']
         processor_kwargs = aggregator_conf['inputs']
 
-        return self.get_processor(name, **processor_kwargs)
+        return self.processors.get_processor(name, **processor_kwargs)
 
     def run_processors(self, collection_id: str, description: 'ItemDescription') -> dict:
         """
@@ -95,6 +95,6 @@ class CollectionGenerator(BaseExtractor):
             'body': body
         }
 
-        self.output(output)
+        self.output(filepath, source_media, output)
 
 

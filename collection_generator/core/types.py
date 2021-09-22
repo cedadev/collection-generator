@@ -8,8 +8,8 @@ __copyright__ = 'Copyright 2018 United Kingdom Research and Innovation'
 __license__ = 'BSD - see LICENSE file in top-level package directory'
 __contact__ = 'richard.d.smith@stfc.ac.uk'
 
-from typing import List, Union, Int, Float, Optional
+from typing import List, Union, Optional
 
-Numeric = Union[Int, Float]
+Numeric = Union[int, float]
 TemporalExtent = List[List[Optional[str]]]
 SpatialExtent = List[List[Numeric]]
