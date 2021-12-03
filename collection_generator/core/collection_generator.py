@@ -15,9 +15,12 @@ __contact__ = 'richard.d.smith@stfc.ac.uk'
 __copyright__ = "Copyright 2020 United Kingdom Research and Innovation"
 __license__ = "BSD - see LICENSE file in top-level package directory"
 
+from typing import Dict
 
 from asset_scanner.core import BaseExtractor
 from asset_scanner.core.utils import dict_merge
+from asset_scanner.types.source_media import StorageType
+
 
 import logging
 
@@ -44,13 +47,50 @@ class CollectionGenerator(BaseExtractor):
 
         return self.processors.get_processor(name, **processor_kwargs)
 
-    def run_processors(self, collection_id: str, description: 'ItemDescription') -> dict:
+    def run_processors(self,
+                       filepath: str,
+                       description: 'ItemDescription',
+                       source_media: StorageType,
+                       **kwargs: Dict) -> Dict:
         """
-        Run the configured processor
+        Extract additional information based on processors listed in the collections
+        section of the item-descriptions.
+
         :param collection_id: id of collection to generate a summary for
         :param description: An ItemDescription object containing the metadata about the collection.
 
         :return: Output from the processor
+        """
+
+        # Get defaults
+        tags = description.collections.defaults
+
+        # Execute the extraction functions
+        processors = description.collections.extraction_methods
+
+        for processor in processors:
+            metadata = self._run_facet_processor(processor, filepath, source_media)
+
+            # Merge the extract metadata with that already retrieved
+            if metadata:
+                tags = dict_merge(tags, metadata)
+
+        # Process multi-values
+
+        # Apply mappings
+
+        # Apply overrides
+
+        return tags
+
+    def get_summaries(self, collection_id: str, description: 'ItemDescription') -> Dict:
+        """
+        Summarise the content in the item data table to generate collections. This will
+        get the queryables and spatial/temporal extent based on indexed data.
+
+        :param collection_id:
+        :param description:
+        :return:
         """
 
         processor = self._load_processor()
@@ -78,6 +118,9 @@ class CollectionGenerator(BaseExtractor):
         collection_id = description.collection['id']
         LOGGER.info(f'Collection ID: {collection_id}')
 
+        # Get summaries
+        summaries = self.get_summaries(collection_id, description)
+
         # Only expects a single processor
         processor_output = self.run_processors(collection_id, description)
 
@@ -86,8 +129,12 @@ class CollectionGenerator(BaseExtractor):
             'type': 'collection'
         }
 
-        # Merge the output from the processor into the base
+        # Merge the output from the processors into the base
         body = dict_merge(base_collection_dict, processor_output)
+
+        # Merge the aggregations into the body. We do it in this order
+        # so that default extents can be provided in the collections description.
+        body = dict_merge(body, summaries)
 
         # Prepare the output
         output = {
