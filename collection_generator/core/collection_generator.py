@@ -75,15 +75,20 @@ class CollectionGenerator(BaseExtractor):
         description = self.item_descriptions.get_description(filepath)
 
         # Get collection id
-        collection_id = description.collection['id']
+        collection_id = description.collections.id
         LOGGER.info(f'Collection ID: {collection_id}')
 
         # Only expects a single processor
         processor_output = self.run_processors(collection_id, description)
 
+        # Check collection description has extent and description fields before output.
+        if not all(key in processor_output for key in ('extent', 'description')):
+            return
+
         # Base collection
         base_collection_dict = {
-            'type': 'collection'
+            'type': 'Collection',
+            'license': 'default'
         }
 
         # Merge the output from the processor into the base
