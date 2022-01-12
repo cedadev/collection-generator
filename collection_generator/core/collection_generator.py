@@ -122,7 +122,7 @@ class CollectionGenerator(BaseExtractor):
         summaries = self.get_summaries(collection_id, description)
 
         # Only expects a single processor
-        processor_output = self.run_processors(collection_id, description)
+        processor_output = self.run_processors(collection_id, description, source_media)
 
         # Check collection description has extent and description fields before output.
         if not all(key in processor_output for key in ('extent', 'description')):
