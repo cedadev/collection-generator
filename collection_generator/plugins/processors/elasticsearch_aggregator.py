@@ -241,7 +241,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         metadata = {}
 
         # Get list of aggregation facets and extra top level facets
-        facets = set(description.aggregation_facets + description.search_facets)
+        facets = set(description.facets.aggregation_facets + description.facets.search_facets)
 
         # Poll elasticsearch for value list for each facet
         summaries = {}

@@ -34,8 +34,8 @@ class CollectionIDInputPlugin(BaseInputPlugin):
             with open(file) as reader:
                 data = yaml.safe_load(reader)
 
-                if data.get('collection', {}).get('id'):
-                    collection_path = data.get('datasets')[0]
+                if data.get('collections', {}).get('id'):
+                    collection_path = data.get('paths')[0]
                     extractor.process_file(collection_path)
                 else:
                     continue

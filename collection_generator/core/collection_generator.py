@@ -92,6 +92,37 @@ class CollectionGenerator(BaseExtractor):
         :return:
         """
 
+        # Get defaults
+        tags = description.collections.defaults
+
+        # Execute the extraction functions
+        processors = description.collections.extraction_methods
+
+        for processor in processors:
+            metadata = self._run_facet_processor(processor, filepath, source_media)
+
+            # Merge the extract metadata with that already retrieved
+            if metadata:
+                tags = dict_merge(tags, metadata)
+
+        # Process multi-values
+
+        # Apply mappings
+
+        # Apply overrides
+
+        return tags
+
+    def get_summaries(self, collection_id: str, description: 'ItemDescription') -> Dict:
+        """
+        Summarise the content in the item data table to generate collections. This will
+        get the queryables and spatial/temporal extent based on indexed data.
+
+        :param collection_id:
+        :param description:
+        :return:
+        """
+
         processor = self._load_processor()
 
         metadata = processor.run(collection_id, description)
@@ -114,18 +145,23 @@ class CollectionGenerator(BaseExtractor):
         description = self.item_descriptions.get_description(filepath)
 
         # Get collection id
-        collection_id = description.collection['id']
+        collection_id = description.collections.id
         LOGGER.info(f'Collection ID: {collection_id}')
 
         # Get summaries
         summaries = self.get_summaries(collection_id, description)
 
-        # Only expects a single processor
+        # Run processors to extract additional information
         processor_output = self.run_processors(filepath, description, source_media)
+
+        # Check collection description has extent and description fields before output.
+        if not all(key in processor_output for key in ('extent', 'description')):
+            return
 
         # Base collection
         base_collection_dict = {
-            'type': 'collection'
+            'type': 'Collection',
+            'license': 'default'
         }
 
         # Merge the output from the processors into the base
