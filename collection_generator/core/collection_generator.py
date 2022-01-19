@@ -38,7 +38,7 @@ class CollectionGenerator(BaseExtractor):
     def _load_processor(self) -> 'BaseProcessor':
         """
         Extract the required information from the configuration file
-        and load the processor
+        and load the aggregation processor
         """
 
         aggregator_conf = self.conf['collection_aggregator']
@@ -56,10 +56,9 @@ class CollectionGenerator(BaseExtractor):
         Extract additional information based on processors listed in the collections
         section of the item-descriptions.
 
-        :param collection_id: id of collection to generate a summary for
+        :param filepath: path of file being processed
         :param description: An ItemDescription object containing the metadata about the collection.
-
-        :return: Output from the processor
+        :param source_media: Source Media Type
         """
 
         # Get defaults
@@ -122,7 +121,7 @@ class CollectionGenerator(BaseExtractor):
         summaries = self.get_summaries(collection_id, description)
 
         # Only expects a single processor
-        processor_output = self.run_processors(collection_id, description)
+        processor_output = self.run_processors(filepath, description, source_media)
 
         # Base collection
         base_collection_dict = {
