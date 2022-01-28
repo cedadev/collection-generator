@@ -84,9 +84,6 @@ setup(
         'asset_scanner.extractors': [
             'collection_generator = collection_generator:FacetExtractor',
         ],
-        'collection_generator.processors': [
-            'elasticsearch_aggregator = collection_generator.plugins.processors.elasticsearch_aggregator:ElasticsearchAggregator'
-        ],
         'asset_scanner.input_plugins': [
             'collection_id = collection_generator.plugins.inputs.collection_id:CollectionIDInputPlugin'
         ]

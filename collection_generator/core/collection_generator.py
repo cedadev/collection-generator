@@ -33,19 +33,7 @@ class CollectionGenerator(BaseExtractor):
     through aggregating content from STAC items.
     """
 
-    PROCESSOR_ENTRY_POINT = 'collection_generator.processors'
-
-    def _load_processor(self) -> 'BaseProcessor':
-        """
-        Extract the required information from the configuration file
-        and load the processor
-        """
-
-        aggregator_conf = self.conf['collection_aggregator']
-        name = aggregator_conf['name']
-        processor_kwargs = aggregator_conf['inputs']
-
-        return self.processors.get_processor(name, **processor_kwargs)
+    PROCESSOR_ENTRY_POINT = 'asset_scanner.processors'
 
     def run_processors(self,
                        filepath: str,
@@ -113,6 +101,7 @@ class CollectionGenerator(BaseExtractor):
 
         # Get description file
         description = self.item_descriptions.get_description(filepath)
+        print(description)
 
         # Get collection id
         collection_id = description.collections.id
