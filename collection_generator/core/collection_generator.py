@@ -35,6 +35,7 @@ class CollectionGenerator(BaseExtractor):
 
     PROCESSOR_ENTRY_POINT = 'asset_scanner.processors'
 
+
     def run_processors(self,
                        filepath: str,
                        description: 'ItemDescription',
@@ -44,10 +45,40 @@ class CollectionGenerator(BaseExtractor):
         Extract additional information based on processors listed in the collections
         section of the item-descriptions.
 
-        :param collection_id: id of collection to generate a summary for
+        :param filepath: path of file being processed
         :param description: An ItemDescription object containing the metadata about the collection.
+        :param source_media: Source Media Type
+        """
 
-        :return: Output from the processor
+        # Get defaults
+        tags = description.collections.defaults
+
+        # Execute the extraction functions
+        processors = description.collections.extraction_methods
+
+        for processor in processors:
+            metadata = self._run_facet_processor(processor, filepath, source_media)
+
+            # Merge the extract metadata with that already retrieved
+            if metadata:
+                tags = dict_merge(tags, metadata)
+
+        # Process multi-values
+
+        # Apply mappings
+
+        # Apply overrides
+
+        return tags
+
+    def get_summaries(self, collection_id: str, description: 'ItemDescription') -> Dict:
+        """
+        Summarise the content in the item data table to generate collections. This will
+        get the queryables and spatial/temporal extent based on indexed data.
+
+        :param collection_id:
+        :param description:
+        :return:
         """
 
         # Get defaults
@@ -110,8 +141,8 @@ class CollectionGenerator(BaseExtractor):
         # Get summaries
         summaries = self.get_summaries(collection_id, description)
 
-        # Only expects a single processor
-        processor_output = self.run_processors(collection_id, description, source_media)
+        # Run processors to extract additional information
+        processor_output = self.run_processors(filepath, description, source_media)
 
         # Check collection description has extent and description fields before output.
         if not all(key in processor_output for key in ('extent', 'description')):
