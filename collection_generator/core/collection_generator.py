@@ -132,7 +132,6 @@ class CollectionGenerator(BaseExtractor):
 
         # Get description file
         description = self.item_descriptions.get_description(filepath)
-        print(description)
 
         # Get collection id
         collection_id = description.collections.id
