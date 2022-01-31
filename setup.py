@@ -86,6 +86,9 @@ setup(
         ],
         'asset_scanner.input_plugins': [
             'collection_id = collection_generator.plugins.inputs.collection_id:CollectionIDInputPlugin'
-        ]
+        ],
+        "collection_generator.processors": [
+            "elasticsearch_aggregator = collection_generator.plugins.processors.elasticsearch_aggregator:ElasticsearchAggregator",
+        ],
     }
 )

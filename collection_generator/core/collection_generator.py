@@ -33,7 +33,7 @@ class CollectionGenerator(BaseExtractor):
     through aggregating content from STAC items.
     """
 
-    PROCESSOR_ENTRY_POINT = 'asset_scanner.processors'
+    PROCESSOR_ENTRY_POINT = 'collection_generator.processors'
 
 
     def run_processors(self,
@@ -134,18 +134,18 @@ class CollectionGenerator(BaseExtractor):
         description = self.item_descriptions.get_description(filepath)
 
         # Get collection id
-        collection_id = description.collections.id
+        collection_id = kwargs['collection_id']
         LOGGER.info(f'Collection ID: {collection_id}')
 
         # Get summaries
         summaries = self.get_summaries(collection_id, description)
 
-        # Run processors to extract additional information
+        # Run processors to extract additional information - Extract: description, license
         processor_output = self.run_processors(filepath, description, source_media)
 
         # Check collection description has extent and description fields before output.
-        if not all(key in processor_output for key in ('extent', 'description')):
-            return
+        # if not all(key in processor_output for key in ('extent', 'description')):
+        #    return
 
         # Base collection
         base_collection_dict = {
@@ -167,5 +167,4 @@ class CollectionGenerator(BaseExtractor):
         }
 
         self.output(filepath, source_media, output)
-
 
