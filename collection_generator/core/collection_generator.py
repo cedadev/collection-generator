@@ -143,6 +143,9 @@ class CollectionGenerator(BaseExtractor):
         # Run processors to extract additional information - Extract: description, license
         processor_output = self.run_processors(filepath, description, source_media)
 
+        if not processor_output.get('license'):
+            processor_output['license'] = 'default'
+
         # Check collection description has extent and description fields before output.
         # if not all(key in processor_output for key in ('extent', 'description')):
         #    return
@@ -150,7 +153,6 @@ class CollectionGenerator(BaseExtractor):
         # Base collection
         base_collection_dict = {
             'type': 'Collection',
-            'license': 'default'
         }
 
         # Merge the output from the processors into the base

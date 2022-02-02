@@ -89,6 +89,7 @@ setup(
         ],
         "collection_generator.processors": [
             "elasticsearch_aggregator = collection_generator.plugins.processors.elasticsearch_aggregator:ElasticsearchAggregator",
+            "json_aggregator = collection_generator.plugins.processors.json_aggregator:JSONAggregator"
         ],
     }
 )
