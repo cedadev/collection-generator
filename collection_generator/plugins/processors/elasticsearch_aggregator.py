@@ -7,8 +7,9 @@ __copyright__ = 'Copyright 2018 United Kingdom Research and Innovation'
 __license__ = 'BSD - see LICENSE file in top-level package directory'
 __contact__ = 'richard.d.smith@stfc.ac.uk'
 
-from collection_generator.core.processor import BaseAggregationProcessor
-from collection_generator.core.types import SpatialExtent, TemporalExtent
+import fileinput
+from asset_scanner.core.processor import BaseAggregationProcessor
+from asset_scanner.core.types import SpatialExtent, TemporalExtent
 from elasticsearch import Elasticsearch
 
 from typing import Optional, List, Dict
@@ -39,7 +40,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
                 name: elasticsearch_aggregator
                 inputs:
-                    item_index: ceda-items
+                    index: ceda-index
                     connection_kwargs:
                       hosts: ['host1:9200','host2:9200']
     """
@@ -48,7 +49,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         super().__init__(**kwargs)
 
         self.es = Elasticsearch(**kwargs['connection_kwargs'])
-        self.item_index = kwargs['item_index']
+        self.index = kwargs['index']
 
     def get_page(self, query: Dict, facet: str, result_list: List) -> List:
         """
@@ -58,7 +59,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         :param result_list: list to extend with any found values
         """
 
-        result = self.es.search(index=self.item_index, body=query)
+        result = self.es.search(index=self.index, body=query)
 
         if result['aggregations']:
             buckets = result['aggregations']['facet']['buckets']
@@ -67,17 +68,17 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
             return result['aggregations']['facet'].get('after_key')
 
     @staticmethod
-    def base_query(collection_id: str) -> Dict:
+    def base_query(file_id: str) -> Dict:
         """
         Base query to filter the results to a single collection
 
-        :param collection_id: Collection to restrict results to
+        :param file_id: Collection to restrict results to
         """
         return {
             "query": {
                 "term": {
                     "collection_id.keyword": {
-                        "value": collection_id
+                        "value": file_id
                     }
                 }
             },
@@ -134,18 +135,18 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
             }
         }
 
-    def get_facet_values(self, facet: str, collection_id: str) -> List:
+    def get_facet_values(self, facet: str, file_id: str) -> List:
         """
         Query elasticsearch and scroll the aggregation response
         to get all the values for the given facet within the given
         collection.
 
         :param facet: Facet to check
-        :param collection_id: Collection ID
+        :param file_id: Collection ID
         :return: List of values for the facet
         """
 
-        query = self.base_query(collection_id)
+        query = self.base_query(file_id)
         query['aggs'] = self.facet_composite_query(facet)
 
         facet_values = []
@@ -204,13 +205,13 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         """
         ...
 
-    def get_extent(self, collection_id: str) -> Dict:
+    def get_extent(self, file_id: str) -> Dict:
         """
         Get the extent aggregation
-        :param collection_id: collection ID
+        :param file_id: collection ID
         """
 
-        query = self.base_query(collection_id)
+        query = self.base_query(file_id)
 
         # Time range query
         query['aggs'] = self.time_range_query()
@@ -218,7 +219,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         # BBOX query
         query['aggs'].update(self.bbox_query())
 
-        result = self.es.search(index=self.item_index, body=query)
+        result = self.es.search(index=self.index, body=query)
 
         extent = {}
         temporal_extent = self.get_temporal_extent(result)
@@ -231,10 +232,10 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
         return extent
 
-    def run(self, collection_id: str, description: 'ItemDescription') -> Dict:
+    def run(self, file_id: str, description: 'ItemDescription') -> Dict:
         """
         Run the processor
-        :param collection_id: Collection ID to aggregate on
+        :param file_id: Collection ID to aggregate on
         :param description: ItemDescription containing keys to summarise
         """
 
@@ -245,13 +246,14 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
         # Poll elasticsearch for value list for each facet
         summaries = {}
+        
         for facet in facets:
-            values = self.get_facet_values(facet, collection_id)
+            values = self.get_facet_values(facet, file_id)
             if values:
                 summaries[facet] = values
 
         # Get extent aggregation
-        extent = self.get_extent(collection_id)
+        extent = self.get_extent(file_id)
 
         # Package up and return
         if summaries:
