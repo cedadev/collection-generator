@@ -84,7 +84,7 @@ setup(
     zip_safe=False,
     entry_points={
         'asset_scanner.extractors': [
-            'collection_generator = collection_generator:FacetExtractor',
+            'collection_generator = collection_generator:CollectionGenerator',
         ],
         'asset_scanner.input_plugins': [
             'collection_id = collection_generator.plugins.inputs.collection_id:CollectionIDInputPlugin'
