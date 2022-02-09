@@ -35,17 +35,6 @@ class CollectionGenerator(BaseExtractor):
 
     PROCESSOR_ENTRY_POINT = 'collection_generator.processors'
 
-    def _load_processor(self) -> 'BaseProcessor':
-        """
-        Extract the required information from the configuration file
-        and load the aggregation processor
-        """
-
-        aggregator_conf = self.conf['collection_aggregator']
-        name = aggregator_conf['name']
-        processor_kwargs = aggregator_conf['inputs']
-
-        return self.processors.get_processor(name, **processor_kwargs)
 
     def run_processors(self,
                        filepath: str,
@@ -145,23 +134,25 @@ class CollectionGenerator(BaseExtractor):
         description = self.item_descriptions.get_description(filepath)
 
         # Get collection id
-        collection_id = description.collections.id
+        collection_id = kwargs['collection_id']
         LOGGER.info(f'Collection ID: {collection_id}')
 
         # Get summaries
         summaries = self.get_summaries(collection_id, description)
 
-        # Run processors to extract additional information
+        # Run processors to extract additional information - Extract: description, license
         processor_output = self.run_processors(filepath, description, source_media)
 
+        if not processor_output.get('license'):
+            processor_output['license'] = 'default'
+
         # Check collection description has extent and description fields before output.
-        if not all(key in processor_output for key in ('extent', 'description')):
-            return
+        # if not all(key in processor_output for key in ('extent', 'description')):
+        #    return
 
         # Base collection
         base_collection_dict = {
             'type': 'Collection',
-            'license': 'default'
         }
 
         # Merge the output from the processors into the base
@@ -178,5 +169,4 @@ class CollectionGenerator(BaseExtractor):
         }
 
         self.output(filepath, source_media, output)
-
 
