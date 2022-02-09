@@ -17,7 +17,7 @@ __license__ = "BSD - see LICENSE file in top-level package directory"
 
 from typing import Dict
 
-from asset_scanner.core import BaseExtractor
+from asset_scanner.core.extractor import BaseExtractor
 from asset_scanner.core.utils import dict_merge
 from asset_scanner.types.source_media import StorageType
 
@@ -50,7 +50,7 @@ class CollectionGenerator(BaseExtractor):
     def run_processors(self,
                        filepath: str,
                        description: 'ItemDescription',
-                       source_media: StorageType,
+                       source_media: StorageType = StorageType.POSIX,
                        **kwargs: Dict) -> Dict:
         """
         Extract additional information based on processors listed in the collections
@@ -129,7 +129,7 @@ class CollectionGenerator(BaseExtractor):
 
         return metadata
 
-    def process_file(self, filepath: str, source_media: str = 'POSIX', **kwargs) -> None:
+    def process_file(self, filepath: str, source_media: StorageType = StorageType.POSIX, **kwargs) -> None:
         """
         Run the workflow
 

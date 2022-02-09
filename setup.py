@@ -76,8 +76,10 @@ setup(
     packages=find_packages(include=['collection_generator', 'collection_generator.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    extras_require={"docs": docs_requirements,
-                    "dev": dev_requirements},
+    extras_require={
+        "docs": docs_requirements,
+        "dev": dev_requirements,
+    },
     url='https://github.com/rsmith013/collection_generator',
     zip_safe=False,
     entry_points={
