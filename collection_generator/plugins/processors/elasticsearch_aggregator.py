@@ -77,7 +77,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         return {
             "query": {
                 "term": {
-                    "collection_id.keyword": {
+                    "collection_id": {
                         "value": file_id
                     }
                 }
@@ -246,7 +246,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
         # Poll elasticsearch for value list for each facet
         summaries = {}
-        
+
         for facet in facets:
             values = self.get_facet_values(facet, file_id)
             if values:
