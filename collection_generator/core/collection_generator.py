@@ -152,7 +152,7 @@ class CollectionGenerator(BaseExtractor):
 
         # Base collection
         base_collection_dict = {
-            'type': 'Collection',
+            'type': 'collection',
         }
 
         # Merge the output from the processors into the base
