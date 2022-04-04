@@ -49,6 +49,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
         self.es = Elasticsearch(**kwargs['connection_kwargs'])
         self.index = kwargs['index']
+        self.aggregate = kwargs.get('aggregate', True)
 
     def get_page(self, query: Dict, facet: str, result_list: List) -> List:
         """
@@ -240,16 +241,19 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
         metadata = {}
 
-        # Get list of aggregation facets and extra top level facets
-        facets = set(description.facets.aggregation_facets + description.facets.search_facets)
+        if self.aggregate:
+            # Get list of aggregation facets and extra top level facets
+            facets = set(description.facets.aggregation_facets + description.facets.search_facets)
 
-        # Poll elasticsearch for value list for each facet
-        summaries = {}
-        
-        for facet in facets:
-            values = self.get_facet_values(facet, file_id)
-            if values:
-                summaries[facet] = values
+            # Poll elasticsearch for value list for each facet
+            summaries = {}
+            for facet in facets:
+                values = self.get_facet_values(facet, file_id)
+                if values:
+                    summaries[facet] = values
+        else:
+            # If there is no aggregation to be made, copy asset properties.
+            summaries = self.get_asset_properties(file_id)
 
         # Get extent aggregation
         extent = self.get_extent(file_id)
