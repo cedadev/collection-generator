@@ -39,7 +39,7 @@ class CollectionGenerator(BaseExtractor):
     def run_processors(self,
                        filepath: str,
                        description: 'ItemDescription',
-                       source_media: StorageType,
+                       source_media: StorageType = StorageType.POSIX,
                        **kwargs: Dict) -> Dict:
         """
         Extract additional information based on processors listed in the collections
@@ -118,7 +118,7 @@ class CollectionGenerator(BaseExtractor):
 
         return metadata
 
-    def process_file(self, filepath: str, source_media: str = 'POSIX', **kwargs) -> None:
+    def process_file(self, filepath: str, source_media: StorageType = StorageType.POSIX, **kwargs) -> None:
         """
         Run the workflow
 
@@ -152,7 +152,7 @@ class CollectionGenerator(BaseExtractor):
 
         # Base collection
         base_collection_dict = {
-            'type': 'Collection',
+            'type': 'collection',
         }
 
         # Merge the output from the processors into the base

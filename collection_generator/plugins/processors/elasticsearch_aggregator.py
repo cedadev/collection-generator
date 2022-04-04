@@ -77,7 +77,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         return {
             "query": {
                 "term": {
-                    "collection_id.keyword": {
+                    "collection_id": {
                         "value": file_id
                     }
                 }
@@ -240,7 +240,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         """
 
         metadata = {}
-
+        
         if self.aggregate:
             # Get list of aggregation facets and extra top level facets
             facets = set(description.facets.aggregation_facets + description.facets.search_facets)
@@ -254,7 +254,6 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         else:
             # If there is no aggregation to be made, copy asset properties.
             summaries = self.get_asset_properties(file_id)
-
         # Get extent aggregation
         extent = self.get_extent(file_id)
 
