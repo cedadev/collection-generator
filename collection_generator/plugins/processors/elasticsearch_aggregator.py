@@ -110,7 +110,20 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         """
         Query to extract the BBOX from items
         """
-        return {}
+        return {
+            "min_lon": {
+                "min": {"field": "properties.min_lon"}
+            },
+            "min_lat": {
+                "min": {"field": "properties.min_lat"}
+            },
+            "max_lon": {
+                "max": {"field": "properties.max_lon"}
+            },
+            "max_lat": {
+                "max": {"field": "properties.max_lat"}
+            },
+        }
 
     @staticmethod
     def facet_composite_query(facet: str) -> Dict:
@@ -203,7 +216,22 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         :param response: Elasticsearch result
         :return: [[minLon, minLat, maxLon, maxLat]]
         """
-        ...
+        aggs = response['aggregations']
+
+        if aggs:
+            min_lon = aggs['min_lon'].get('value')
+            min_lat = aggs['min_lat'].get('value')
+            max_lon = aggs['max_lon'].get('value')
+            max_lat = aggs['max_lat'].get('value')
+            bbox = [
+                min_lon,
+                min_lat,
+                max_lon,
+                max_lat
+            ]
+
+            if all(bbox):
+                return bbox
 
     def get_extent(self, file_id: str) -> Dict:
         """
@@ -240,7 +268,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
         """
 
         metadata = {}
-        
+
         if self.aggregate:
             # Get list of aggregation facets and extra top level facets
             facets = set(description.facets.aggregation_facets + description.facets.search_facets)
