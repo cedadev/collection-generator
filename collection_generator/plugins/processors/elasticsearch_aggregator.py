@@ -7,7 +7,8 @@ __copyright__ = 'Copyright 2018 United Kingdom Research and Innovation'
 __license__ = 'BSD - see LICENSE file in top-level package directory'
 __contact__ = 'richard.d.smith@stfc.ac.uk'
 
-from asset_scanner.core.processor import BaseAggregationProcessor
+from asset_scanner.core.aggregation_processor import BaseAggregationProcessor
+from asset_scanner.core.item_describer import ItemDescription
 from asset_scanner.core.types import SpatialExtent, TemporalExtent
 from elasticsearch import Elasticsearch
 
@@ -260,7 +261,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
         return extent
 
-    def run(self, file_id: str, description: 'ItemDescription') -> Dict:
+    def run(self, file_id: str, description: ItemDescription) -> Dict:
         """
         Run the processor
         :param file_id: Collection ID to aggregate on
@@ -271,7 +272,7 @@ class ElasticsearchAggregator(BaseAggregationProcessor):
 
         if self.aggregate:
             # Get list of aggregation facets and extra top level facets
-            facets = set(description.facets.aggregation_facets + description.facets.search_facets)
+            facets = description.facets.collection_facets
 
             # Poll elasticsearch for value list for each facet
             summaries = {}
