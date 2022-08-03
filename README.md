@@ -1,6 +1,6 @@
-====================
-collection-generator
-====================
+:warning: **This repository has been archived. The Asset Generator is now included in [STAC Generator](https://github.com/cedadev/stac-generator/)**
+
+# collection-generator
 
 Generate and update collections based on item-descriptions
 
